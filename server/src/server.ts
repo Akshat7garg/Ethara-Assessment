@@ -3,8 +3,8 @@ import app from "./app.js";
 
 dotenv.config();
 
-const PORT = 8000;
+const PORT = 8080;
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
