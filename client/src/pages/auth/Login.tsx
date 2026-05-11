@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Link,
     useNavigate
@@ -11,12 +11,22 @@ const Login = () => {
     const navigate = useNavigate();
 
     const { login } = useAuth();
-
     const [email, setEmail] = useState("");
-
     const [password, setPassword] = useState("");
-
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (token && user?.role === "ADMIN") {
+            navigate("/dashboard");
+        }
+
+        if (token && user?.role === "MEMBER") {
+            navigate("/member-dashboard");
+        }
+    }, []);
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
