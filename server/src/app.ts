@@ -10,6 +10,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.get("/", (req, res) => {
+    res.send("API Running");
+});
+
 import userRoute from './routes/user.route.js'
 import projectRoute from "./routes/project.route.js";
 import taskRoutes from "./routes/task.route.js";
