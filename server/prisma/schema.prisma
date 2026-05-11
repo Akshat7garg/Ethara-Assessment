@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// USER MODEL
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // RELATIONS
+
+  createdProjects Project[]       @relation("ProjectCreator")
+  assignedTasks   Task[]          @relation("AssignedTasks")
+  createdTasks    Task[]          @relation("TaskCreator")
+
+  projectMembers  ProjectMember[]
+}
+
+// PROJECT MODEL
+
+model Project {
+  id          String   @id @default(cuid())
+
+  title       String
+  description String?
+
+  createdBy   String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // RELATIONS
+
+  creator User @relation("ProjectCreator", fields: [createdBy], references: [id])
+
+  members ProjectMember[]
+  tasks   Task[]
+}
+
+// PROJECT MEMBER MODEL
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+
+  projectId String
+  userId    String
+
+  joinedAt  DateTime @default(now())
+
+  // RELATIONS
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  // PREVENT DUPLICATES
+
+  @@unique([projectId, userId])
+}
+
+// TASK MODEL
+
+model Task {
+  id          String       @id @default(cuid())
+
+  title       String
+  description String?
+
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+
+  // ASSIGNED USER
+
+  assignedTo  String
+  assignee    User @relation("AssignedTasks", fields: [assignedTo], references: [id])
+
+  // TASK CREATOR
+
+  createdBy   String
+  creator     User @relation("TaskCreator", fields: [createdBy], references: [id])
+
+  // OPTIONAL PROJECT
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+
+  // TIMESTAMPS
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
